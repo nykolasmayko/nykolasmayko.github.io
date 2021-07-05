@@ -271,15 +271,25 @@ Portanto, é fortemente aconselhável utilizar referências _weak_ ao invés de 
 
 
 
+
 ### 4) Referências
 
 [Memory Management in Swift: Heaps & Stacks](https://heartbeat.fritz.ai/memory-management-in-swift-heaps-stacks-baa755abe16a)
+
 [Memory Management and Performance of Value Types](https://swiftrocks.com/memory-management-and-performance-of-value-types.html)
+
 [https://developer.apple.com/videos/play/wwdc2016/416/](https://developer.apple.com/videos/play/wwdc2016/416/)
+
 [Stop Using Structs!](https://medium.com/commencis/stop-using-structs-e1be9a86376f)
+
 [Clean iOS Architecture pt.4: Clean Memory Management in Swift with WeakRef](https://medium.com/essential-developer-ios/clean-ios-architecture-pt-4-clean-memory-management-in-swift-with-weakref-1ca1501a7e35)
+
 [Manual Memory Management](https://developer.apple.com/documentation/swift/swift_standard_library/manual_memory_management)
+
 [Value Types and Reference Types in Swift](https://www.vadimbulavin.com/value-types-and-reference-types-in-swift/)
+
 [Structures and Classes](https://docs.swift.org/swift-book/LanguageGuide/ClassesAndStructures.html)
+
 [Choosing Between Structures and Classes](https://developer.apple.com/documentation/swift/choosing_between_structures_and_classes)
+
 [Automatic Reference Counting](https://docs.swift.org/swift-book/LanguageGuide/AutomaticReferenceCounting.html)
