@@ -358,7 +358,7 @@ Então, teremos a seguinte configuração:
 ![](https://docs.swift.org/swift-book/_images/weakReference01_2x.png)
 Fonte: [Documentação Apple](https://docs.swift.org/swift-book/_images/weakReference01_2x.png)
 
-Para maiores informações de como tratar casos como esses e possíveis _memories leaks_ caudados por _closures_ acessar: https://docs.swift.org/swift-book/LanguageGuide/AutomaticReferenceCounting.html#ID52
+Para maiores informações de como tratar casos como esses e possíveis _memories leaks_ caudados por _closures_ acessar: [https://docs.swift.org/swift-book/LanguageGuide/AutomaticReferenceCounting.html#ID52](https://docs.swift.org/swift-book/LanguageGuide/AutomaticReferenceCounting.html#ID52)
 
 ### 4) Referências
 
