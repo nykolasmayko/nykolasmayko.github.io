@@ -102,3 +102,24 @@ Em linhas gerais, abaixo, pode-se verificar as responsabilidades de cada uma das
 - O ***Heap*** armazena os objetos que possuem um tempo de vida. Todos são Tipo Refência e, alguns casos, Tipo Valor. O *heap* e a *stack* crescem em direção à outra.
 
  
+Considere o código abaixo:
+```swift
+class VideoMode {}
+struct Resolution {}
+enum ResolutionType {}
+protocol ResolutionDelegate {}
+```
+
+A alocação, na memória, seguirá a tabela:
+
+| Stack | Heap |
+|--------|------|
+|Resolution | VideoMode |
+|ResolutionType | \<Class\> |
+|ResolutionDelegate| \<Class\> |
+|\<Bool\> | \<Class\> |
+|\<Int> | \<Class\> | 
+
+Ou seja, _Struct_, _Enum_, _Protocol_, _Int_, _Bool_, dentre outros, são armazenados na ***Stack*** da memória, portanto são **mais perfomárticos** pois o tempo de acesso à Stack é **O(1)**, contudo, podem perder perfomance caso hajam propriedades que são armazenadas no _Heap_. Além disso, ***são estáticas e alocadas em tempo de compilação.***
+
+Já as ***Classes*** são sempre armazenadas ***Heap***, onde cada bloco, possui o tamanho das _n_ variáveis acrescidos do espaço para guardar o contador de referências e o endereço da memória. Devido a isso, são menos performáticas pois há um custo de gestão das escritas/acessos, alocação/desalocação e multithreads no _Heap_. ***São dinâmicas ee alocadas em tempo de execução.***
