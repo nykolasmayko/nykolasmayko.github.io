@@ -255,7 +255,7 @@ john!.apartment = unit4A
 unit4A!.tenant = WeakRef(john)
 ```
 
-##### Unowned
+##### Referências _Unowned_
 
 Assim como uma referência fraca (_weak_), uma referência _unowned_ **não** mantém um controle forte sobre a instância a que se referem. Porém, diferente de uma referência *weak*, uma referência *unowned* é usada quando outra instância tem o mesmo ou mais longo tempo de vida. Você define uma referência _unowned_ através do palavra-chave _unowned_ antes da declaração da propriedade ou variável.
 
@@ -267,10 +267,98 @@ Diferente de uma referência fraca, uma referência quando marcada como _unowned
 
 Portanto, é fortemente aconselhável utilizar referências _weak_ ao invés de _unowned_ e realizar o _safe unwrap_ para evitar _crashes_ inesperados na aplicação.
 
+Para concluir, abaixo, uma tabela resumindo as propriedades de cada tipo de referência:
+
+| 		    | _var_ | _let_ | opcional | não opcional |
+|:---------:| :------:| :-----: | :--------: | :------------: |
+|_strong_	| 👍      | 👍     | 👍         | 👍             |
+| _weak_ 	| 👍      | 👎     | 👍         | 👎             |
+| _unowned_ | 👍      | 👍     | 👎         | 👍             |
+
 #### 3.3) Ciclos de Referências Fortes
 
+Nos exemplos acima, o _ARC_ é capaz de contar o número de referências de uma nova instância de _Person_ que você cria e desalocada a instância que não está mais sendo utilizada. Contudo, é possível escrever um código, no qual, uma instância de uma classe **nunca** chega no ponto onde o contador de referências fortes é zero. Isso pode acontecer se duas classes controlam referências fortes entre elas, onde cada instância permanece "viva". Isso é conhecido como Ciclo de Referências Fortes (_strong references cycle_).
+
+A seguir, tem-se um exemplo de  Ciclo de Referências Fortes que pode ser criado por acidente:
+
+```swift
+class Person {
+	let name: String
+	init(name: String) { self.name = name }
+	var apartment: Apartment?
+	deinit { print("\(name) está sendo deinicializado") }
+}
+
+class Apartment {
+	let unit: String
+	init(unit: String) { self.unit = unit }
+	var tenant: Person?
+	deinit { print("O apartamento \(unit) está sendo deinicializado") }
+}
+``` 
+
+Toda instancia de _Person_ tem a propriedade _name_ do tipo _String_ e uma propriedade opcional _apartment_, inicialmente, _nil_.  Da mesma maneira, toda instância de _Apartment_ possui uma propriedade _unit_ do tipo _String_ e uma outra opcional, _tenant_ inicialmente _nil_ do tipo _Person_.
+
+O próximo trecho de código, define duas variáveis opcionais, _john_ e _unit4A_, a quais serão atribuídas a uma instância de _Person_ e _Apartment_ respectivamente.
+
+```swift
+var john: Person?
+var unit4A: Apartment?
+
+john = Person(name: "Joãozinho da Silva")
+unit4A = Apartment(unit: "4A")
+``` 
+
+Aqui é como as referências fortes aparecem após criar e atribuir as duas instâncias.
+
+![](https://docs.swift.org/swift-book/_images/referenceCycle01_2x.png) Fonte: [Documentação Apple](https://docs.swift.org/swift-book/_images/referenceCycle01_2x.png)
+
+Agora, podemos vincular essas duas referências, pois uma pessoa possui um apartamento e, portanto, um apartamento possui um inquilino.
 
 
+```swift
+john!.apartment = unit4A
+unit4A!.tenant = john
+``` 
+
+Assim, após vincular as referências, teremos:
+
+![](https://docs.swift.org/swift-book/_images/referenceCycle02_2x.png)
+Fonte: [Documentação Apple](https://docs.swift.org/swift-book/_images/referenceCycle02_2x.png)
+
+Infelizmente, vinculando essas duas referências, cria-se um ciclo de referências forte entre elas. Se, quebrarmos as referências controladas pelas variáveis _john_ e _unit4A_, o contador de referências **não** vai a zero e, assim, as instâncias **não são retiradas da memória** pelo _ARC_.
+
+```swift
+john = nil
+unit4A = nil
+``` 
+
+Pecebe-se que nenhum deinicializador seja da classe _Person_ ou mesmo da _Apartment_, foi chamado quando atribuiu-se _nil_ às variáveis. **O ciclo de referências fortes evita que ambas instâncias sejam retiradas das memória, causando um vazamento de memória (_memory leak_) na sua aplicação**.
+
+Aqui, é mostrado como as referências fortes aparecem após atribuir _nil_ as variáveis _john_ e _unit4A_:
+
+![](https://docs.swift.org/swift-book/_images/referenceCycle03_2x.png)
+Fonte: [Documentação Apple](https://docs.swift.org/swift-book/_images/referenceCycle03_2x.png)
+
+As referências fortes entre a instância Person e a instância Apartment permanecem e não podem ser quebradas.
+
+Para resolver esse problema, podemos usar a abordagem mostrada na seção anterior, marcando uma das referências como fracas, por questões de lógica, a referência que deverá ser marcada como _weak_ é a propriedade _tenant_, pois é claro que o "relacionamento" entre um apartamento e o seu inquilino não é forte, dessa forma, podemos reescrever o código realizando essa alteração e utilizando o _wrapper_ `WeakRef`:
+
+```swift
+class Apartment {
+	let unit: String
+	init(unit: String) { self.unit = unit }
+	var tenant: WeakRef<Person>?
+	deinit { print("O apartamento \(unit) está sendo deinicializado") }
+}
+```
+
+Então, teremos a seguinte configuração:
+
+![](https://docs.swift.org/swift-book/_images/weakReference01_2x.png)
+Fonte: [Documentação Apple](https://docs.swift.org/swift-book/_images/weakReference01_2x.png)
+
+Para maiores informações de como tratar casos como esses e possíveis _memories leaks_ caudados por _closures_ acessar: https://docs.swift.org/swift-book/LanguageGuide/AutomaticReferenceCounting.html#ID52
 
 ### 4) Referências
 
@@ -293,3 +381,9 @@ Portanto, é fortemente aconselhável utilizar referências _weak_ ao invés de 
 [Choosing Between Structures and Classes](https://developer.apple.com/documentation/swift/choosing_between_structures_and_classes)
 
 [Automatic Reference Counting](https://docs.swift.org/swift-book/LanguageGuide/AutomaticReferenceCounting.html)
+
+[ARC and Memory Management in Swift](https://www.raywenderlich.com/966538-arc-and-memory-management-in-swift#toc-anchor-004)
+
+[Memory Management](https://www.swiftbysundell.com/basics/memory-management/)
+
+[Resource Management and Security issues in Mobile Phone Operating Systems: A Comparative Analysis](https://www.researchgate.net/publication/345691012_Resource_management_and_security_issues_in_mobile_phone_operating_systems_A_comparative_analysis)
