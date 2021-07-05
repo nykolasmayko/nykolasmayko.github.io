@@ -4,19 +4,14 @@ Certamente, você já deve ter se perguntado a diferença entre _Struct_ e _Clas
 
 Então, vem comigo que vou tentar explicar um pouco ~esse assunto daria uma tese de Doutorado~ do que eu encontrei e achei bastante interessante compartilhar. Em resumo, seguiremos os seguintes tópicos:
 
-1) O que são _Struct_ e _Class?_
+- O que são _Struct_ e _Class?_
+- O que significa, especificamente, **Tipo Valor** e **Tipo Referência**?
+	- _Stack_ x _Heap_
+- Gerenciamento de Memória
+	- Contador Automático de Referências (_ARC)_
+	- _Strong_ x _Weak_
+	- Ciclos de Referências Fortes
 
-2) O que significa, especificamente, **Tipo Valor** e **Tipo Referência**?
-	
-	2.1) _Stack_ x _Heap_
-
-3) Gerenciamento de Memória
-	
-	3.1) Contador Automático de Referências (_ARC)_
-	
-	3.2) _Strong_ x _Weak_
-	
-	3.3) Ciclos de Referências Fortes
 
 ### 1) **O que são _Struct_ e _Class?_**
 
