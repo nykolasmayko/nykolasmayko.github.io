@@ -94,7 +94,7 @@ O *address space* de uma aplicação iOS, logicamente, consiste em 4 segmentos: 
 
 ![](https://www.vadimbulavin.com/assets/images/posts/value-reference-types/memory-segments.svg)
 
-Fonte: [https://www.vadimbulavin.com/value-types-and-reference-types-in-swift/](https://www.vadimbulavin.com/value-types-and-reference-types-in-swift/)
+Fonte: [Value Types and Reference Types in Swift](https://www.vadimbulavin.com/value-types-and-reference-types-in-swift/)
 
 Em linhas gerais, abaixo, define-se as responsabilidades de cada uma das seções:
 
