@@ -10,15 +10,15 @@ Então, vem comigo que vou tentar explicar um pouco ~esse assunto daria uma tese
 - Gerenciamento de Memória
 	- Contador Automático de Referências (_ARC)_
 		- _ARC_ em ação
-	- _Strong_ x _Weak_ x _Unowned_
+	- _Weak_ x _Unowned_
 	- Ciclos de Referências Fortes
 - Referências
 
-## 1) **O que são _Struct_ e _Class?_**
+## 1) **O que são _Structures_ e _Class?_**
 
-_Struct_ e _Class_ são estruturas flexíveis de uso geral que, juntas, se tornam como blocos de construção dentro do código do seu programa. Ou seja, você define propriedades e funções para adicionar funcionalidades a suas _Structs_ e _Classes_ usando a mesma sintaxe que você usa para definir constantes, variáveis e funções. Todo e qualquer tipo abstrato de dado que você criará, para realizar suas abstrações, poderão ser do tipo _Struct_ ou _Class_, lá estarão todas as propriedades e comportamentos da abstração desenvolvida.
+_Struct_ e _Class_ são estruturas flexíveis de uso geral que, juntas, se tornam como blocos de construção dentro do código do seu programa. Ou seja, você define propriedades e funções para adicionar funcionalidades a suas _Structures_ e _Classes_ usando a mesma sintaxe que você usa para definir constantes, variáveis e funções. Todo e qualquer tipo abstrato de dado que você criará, para realizar suas abstrações, poderão ser do tipo _Struct_ ou _Class_, lá estarão todas as propriedades e comportamentos da abstração desenvolvida.
 
-**_Structs_** **e _Classes_, em Swift, possuem muitas coisas em comum. Ambas podem:**
+**_Structures_** **e _Classes_, em Swift, possuem muitas coisas em comum. Ambas podem:**
 -   Definir propriedades para armazenar valores;
 -   Definir métodos que fornecem funcionalidades;
 -   Definir _subscripts_ para fornecer acesso aos seus valores usando a sintaxe _subscript_;
@@ -26,13 +26,13 @@ _Struct_ e _Class_ são estruturas flexíveis de uso geral que, juntas, se torna
 -   Serem extendidas para expandir suas funcionalidades, além da implementação inicial;
 -   Implementar protocolos (_protocols)_ para fornecer funcionalidades padrão a um certo tipo.
 
-_Classes_ possuem capacidades adicionais que _Structs_ não possuem:
+_Classes_ possuem capacidades adicionais que _Structures_ não possuem:
 
 -   A Herança permite que uma classe herde características de uma outra classe;
 -   Conversão de tipo permite que você cheque e interprete o tipo de uma instancia de uma classe em tempo de execução;
 -   Deinicializadores permitem que a instancia de uma classe liberar a memória de quaisquer recursos a ela atribuídos;
 
-Portanto, percebe-se que _Struct_ e _Classes_ possuem bastante coisas em comum, mas possuem **diferenças chaves** que nos fazem ter que pensar no uso mais adequado para a implementação que será realizada. De acordo com [_https://developer.apple.com/documentation/swift/choosing_between_structures_and_classes_](https://developer.apple.com/documentation/swift/choosing_between_structures_and_classes) temos alguns pontos que podem nos ajudar a decidir entre a utilização de uma _Struct_ ou _Class_.
+Portanto, percebe-se que _Struct_ e _Classes_ possuem bastante coisas em comum, mas possuem **diferenças chaves** que nos fazem ter que pensar no uso mais adequado para a implementação que será realizada. De acordo com [Choosing Between Structures and Classes](https://developer.apple.com/documentation/swift/choosing_between_structures_and_classes) temos alguns pontos que podem nos ajudar a decidir entre a utilização de uma _Struct_ ou _Class_.
 
 ## **2) O que significa, especificamente, Tipo Valor e Tipo Referência?**
 
@@ -200,11 +200,86 @@ var reference3 = nil
 
 Como você percebeu, as referências são qualificadas, o _ARC_ conta **apenas** referências **fortes (_strong_)**, então, a seguir, vamos mostrar os outros dois tipos de referências e defini-las.
 
-#### 3.2) _Strong_ x _Weak_ x _Unowned_
+#### 3.2) _Weak_ x _Unowned_
 
+No exemplo acima, observamos que, por padrão, as referências criadas em Swift, são do tipo **_strong_**, porém, existem outros dois tipos de referências: ***weak*** e ***unowned***. A seguir, vamos defini-las e mostrar suas diferenças.
 
+##### Referências _Weak_
+
+De acordo com a documentação, uma referência _weak_ é uma referência que **não** mantém um controle forte da instância a que se refere e, assim, **não impede o *ARC*  de descartar a instância referenciada**. Você indica uma referência _weak_ colocando a **palavra-chave _weak_ antes da declaração da propriedade ou variável**.
+
+Como uma referência _weak_ não mantém um controle forte da instância a que se refere, é possível que a instância seja desalocada enquanto a referência *weak* ainda esteja referenciando-a. Além, disso, **o *ARC* automaticamente atribui _nil_ à referência _weak_ quando a instância é desalocada**. E, como **referências fracas precisam alterar seus valores**, em tempo de execução, **elas sempre serão declaradas como variáveis**, em invés de constantes, de um tipo opcional.
+
+> Observadores de propriedade não são chamados quando _ARC_ define uma referência fraca para _nil_.
+
+Abaixo, temos um exemplo de declaração de uma referência _weak_:
+
+```swift
+class Apartment {
+	let unit: String
+	init(unit: String) { self.unit = unit }
+	weak var tenant: Person?
+	deinit { print("O apartamento \(unit) está sendo deinicializado") }
+}
+```
+
+Em algum momento, você poderá se deparar com um caso de uso onde será nessário armazenar referências _weak_ em _Arrays_ ou _Dictionaries_, porém, essas estruturas apenas "aceitam" referências forte (*strong*), portanto, uma maneira de conseguir armazená-las, será criar um *wrapper* para encapsular essa referência fraca. Conforme [`WeakRef`: A Swift type-safe alternative to  `weak`properties](https://github.com/essentialdevelopercom/swift-weak-ref) podemos realizar a seguinte implementação:
+
+```swift
+final class WeakRef<T: AnyObject> {
+	weak var object: T?
+	
+	init(_ object: T?) {
+		self.object = object
+	}
+}
+```
+
+Podendo ser usado conforme:
+
+```swift
+class Apartment {
+	let unit: String
+	init(unit: String) { self.unit = unit }
+	var tenant: WeakRef<Person>?
+	deinit { print("O apartamento \(unit) está sendo deinicializado") }
+}
+
+var john: Person?
+var unit4A: Apartment?
+
+john = Person(name: "John Appleseed")
+unit4A = Apartment(unit: "4A")
+
+john!.apartment = unit4A
+unit4A!.tenant = WeakRef(john)
+```
+
+##### Unowned
+
+Assim como uma referência fraca (_weak_), uma referência _unowned_ **não** mantém um controle forte sobre a instância a que se referem. Porém, diferente de uma referência *weak*, uma referência *unowned* é usada quando outra instância tem o mesmo ou mais longo tempo de vida. Você define uma referência _unowned_ através do palavra-chave _unowned_ antes da declaração da propriedade ou variável.
+
+Diferente de uma referência fraca, uma referência quando marcada como _unowned_ espera-se que **sempre** tenha um valor. Assim, marcar uma referência como _unowned_ não a faz opcional e o _ARC_ nunca atribui o valor _nil_ a uma referência _unowned_.
+
+> Use uma referência _unowned_ **apenas quando tiver certeza** de que a referência sempre se refere a uma **instância que não foi desalocada**.
+> 
+> Se você tentar acessar o valor de uma referência _unowned_ depois que a instância foi desalocada, você receberá um erro de tempo de execução.
+
+Portanto, é fortemente aconselhável utilizar referências _weak_ ao invés de _unowned_ e realizar o _safe unwrap_ para evitar _crashes_ inesperados na aplicação.
 
 #### 3.3) Ciclos de Referências Fortes
 
 
+
 ### 4) Referências
+
+[Memory Management in Swift: Heaps & Stacks](https://heartbeat.fritz.ai/memory-management-in-swift-heaps-stacks-baa755abe16a)
+[Memory Management and Performance of Value Types](https://swiftrocks.com/memory-management-and-performance-of-value-types.html)
+[https://developer.apple.com/videos/play/wwdc2016/416/](https://developer.apple.com/videos/play/wwdc2016/416/)
+[Stop Using Structs!](https://medium.com/commencis/stop-using-structs-e1be9a86376f)
+[Clean iOS Architecture pt.4: Clean Memory Management in Swift with WeakRef](https://medium.com/essential-developer-ios/clean-ios-architecture-pt-4-clean-memory-management-in-swift-with-weakref-1ca1501a7e35)
+[Manual Memory Management](https://developer.apple.com/documentation/swift/swift_standard_library/manual_memory_management)
+[Value Types and Reference Types in Swift](https://www.vadimbulavin.com/value-types-and-reference-types-in-swift/)
+[Structures and Classes](https://docs.swift.org/swift-book/LanguageGuide/ClassesAndStructures.html)
+[Choosing Between Structures and Classes](https://developer.apple.com/documentation/swift/choosing_between_structures_and_classes)
+[Automatic Reference Counting](https://docs.swift.org/swift-book/LanguageGuide/AutomaticReferenceCounting.html)
