@@ -9,13 +9,14 @@ Então, vem comigo que vou tentar explicar um pouco ~esse assunto daria uma tese
 	- _Stack_ x _Heap_
 - Gerenciamento de Memória
 	- Contador Automático de Referências (_ARC)_
-	- _Strong_ x _Weak_
+		- _ARC_ em ação
+	- _Strong_ x _Weak_ x _Unowned_
 	- Ciclos de Referências Fortes
+- Referências
 
+## 1) **O que são _Struct_ e _Class?_**
 
-### 1) **O que são _Struct_ e _Class?_**
-
-_Struct_ e _Class_ são estruturas flexíveis de uso geral que, juntas, se tornam como blocos de construção, dentro do código do seu programa. Ou seja, você define propriedades e funções para adicionar funcionalidades a suas _Structs_ e _Classes_ usando a mesma sintaxe que você usa para definir constantes, variáveis e funções. Todo e qualquer tipo abstrato de dado que você criará para realizar suas abstrações poderão ser do tipo _Struct_ ou _Class,_ onde lá estarão todas as propriedades e comportamentos da abstração desenvolvida.
+_Struct_ e _Class_ são estruturas flexíveis de uso geral que, juntas, se tornam como blocos de construção dentro do código do seu programa. Ou seja, você define propriedades e funções para adicionar funcionalidades a suas _Structs_ e _Classes_ usando a mesma sintaxe que você usa para definir constantes, variáveis e funções. Todo e qualquer tipo abstrato de dado que você criará, para realizar suas abstrações, poderão ser do tipo _Struct_ ou _Class_, lá estarão todas as propriedades e comportamentos da abstração desenvolvida.
 
 **_Structs_** **e _Classes_, em Swift, possuem muitas coisas em comum. Ambas podem:**
 -   Definir propriedades para armazenar valores;
@@ -33,7 +34,7 @@ _Classes_ possuem capacidades adicionais que _Structs_ não possuem:
 
 Portanto, percebe-se que _Struct_ e _Classes_ possuem bastante coisas em comum, mas possuem **diferenças chaves** que nos fazem ter que pensar no uso mais adequado para a implementação que será realizada. De acordo com [_https://developer.apple.com/documentation/swift/choosing_between_structures_and_classes_](https://developer.apple.com/documentation/swift/choosing_between_structures_and_classes) temos alguns pontos que podem nos ajudar a decidir entre a utilização de uma _Struct_ ou _Class_.
 
-### **2) O que significa, especificamente, Tipo Valor e Tipo Referência?**
+## **2) O que significa, especificamente, Tipo Valor e Tipo Referência?**
 
 Um **Tipo Valor** é um tipo no qual o **valor** é **copiado** quando é atribuído a uma variável ou constante, ou quando é passado por uma função. Todos os tipos básicos em Swift: _integers, floating-point numbers, Booleans, strings, arrays_ e _dictionaries_ são tipo valor e são implementados como _structures_ por “baixo dos panos”.
 
@@ -85,23 +86,22 @@ print("A propriedade frameRate da constante tenEighty agora é \(tenEighty.frame
 
 #### 2.1 _Stack_ x _Heap_
 
-Agora que entendemos a diferença entre variáveis ou constantes Tipo Valor e Tipo Referência, vamos mergulhar um pouco mais sobre profundo e entender onde cada uma das propriedades são guardadas na memória quando são do Tipo Valor e quando são Tipo Referência.
+Agora que entendemos a diferença entre variáveis ou constantes Tipo Valor e Tipo Referência, vamos mergulhar um pouco mais profundo e entender onde cada uma das propriedades são guardadas na memória quando são do Tipo Valor e quando são Tipo Referência.
 
-**Memória** é apenas uma longa lista de bytes. Os bytes são organizados ordenadamente, todo byte tem seu próprio endereço. Um intervalo discreto de endereços é conhecido como um **espaço de endereço** ou ***address space***.
+**Memória** é apenas uma longa lista de bytes. Os bytes são organizados ordenadamente e todo byte tem seu próprio endereço. Um intervalo discreto de endereços é conhecido como um **espaço de endereço** ou ***address space***.
 
 O *address space* de uma aplicação iOS, logicamente, consiste em 4 segmentos: texto, dados, a ***stack*** e o ***heap***:
 
 ![](https://www.vadimbulavin.com/assets/images/posts/value-reference-types/memory-segments.svg)
 *Fonte: https://www.vadimbulavin.com/value-types-and-reference-types-in-swift/*
 
-Em linhas gerais, abaixo, pode-se verificar as responsabilidades de cada uma das seções:
+Em linhas gerais, abaixo, define-se as responsabilidades de cada uma das seções:
 
 - O segmento de **Texto** contém a máquina de instruções que forma o código executável do app. O segmento é *read-only* e ocupa um espaço constante;
-- O segmento de **Dados**  armazena as variáveis estáticas do Swift, constantes, etc. Todos os dados globais que necessitam de um valor inicial quando o programa é iniciado.
-- A ***Stack*** armazena dados temporários: parâmetro de funções e variáveis locais. Sempre que chamamos uma função, uma nova peça de memória é alocada na *stack*. Essa memória é liberada quando o método é encerrado.
+- O segmento de **Dados**  armazena as variáveis estáticas do Swift, constantes, etc. Todos os dados globais que necessitam de um valor inicial quando o programa é iniciado;
+- A ***Stack*** armazena dados temporários: parâmetro de funções e variáveis locais. Sempre que chamamos uma função, uma nova peça de memória é alocada na *stack*. Essa memória é liberada quando o método/função é encerrado;
 - O ***Heap*** armazena os objetos que possuem um tempo de vida. Todos são Tipo Refência e, alguns casos, Tipo Valor. O *heap* e a *stack* crescem em direção à outra.
 
- 
 Considere o código abaixo:
 ```swift
 class VideoMode {}
@@ -120,6 +120,91 @@ A alocação, na memória, seguirá a tabela:
 |\<Bool\> | \<Class\> |
 |\<Int> | \<Class\> | 
 
-Ou seja, _Struct_, _Enum_, _Protocol_, _Int_, _Bool_, dentre outros, são armazenados na ***Stack*** da memória, portanto são **mais perfomárticos** pois o tempo de acesso à Stack é **O(1)**, contudo, podem perder perfomance caso hajam propriedades que são armazenadas no _Heap_. Além disso, ***são estáticas e alocadas em tempo de compilação.***
+Ou seja, _Struct_, _Enum_, _Protocol_, _Int_, _Bool_, dentre outros, são armazenados na ***Stack*** da memória, portanto, são **mais perfomárticos** pois o tempo de acesso à Stack é **O(1)**, contudo, podem perder perfomance caso hajam propriedades que são armazenadas no _Heap_. Além disso, ***são estáticas e alocadas em tempo de compilação.***
 
-Já as ***Classes*** são sempre armazenadas ***Heap***, onde cada bloco, possui o tamanho das _n_ variáveis acrescidos do espaço para guardar o contador de referências e o endereço da memória. Devido a isso, são menos performáticas pois há um custo de gestão das escritas/acessos, alocação/desalocação e multithreads no _Heap_. ***São dinâmicas ee alocadas em tempo de execução.***
+Já as ***Classes*** são sempre armazenadas no ***Heap***, onde cada bloco, possui o tamanho das _n_ variáveis acrescidos do espaço para guardar o contador de referências e o endereço da memória. Devido a isso, são menos performáticas pois há um custo de gestão das escritas/acessos, alocação/desalocação e multithreads no _Heap_. ***São dinâmicas e alocadas em tempo de execução.***
+
+
+## 3) **Gerenciamento de Memória**
+
+Gerenciamento de memória é um processo de alocação de memória durante a compilação do programa/app ou em tempo de execução. A Memória pode ser liberada quando uma tarefa é terminada. Sabe-se quer um bom código usa o mínimo possível de memória.
+
+Há muitos problemas durante o processo dee alocação de memória, por exemplo, o iOS liberar ou sobrescrever a memória enquanto ela ainda está em uso. Devido a isso, existem uma série de problemas que ocorrem, tais como corrupção de memória, _crashing_ do aplicativo, a aplicação corromper o dado do usuário, etc. Outro problema bastante sério é o iOS não liberar o dado ou espaço de memória que não está mais sendo usado, causando o famoso _memory leak_. 
+
+Para tanto, o Swift fornece aos desenvolvedores ferramentas e boas práticas para evitar esses problemas.
+
+#### 3.1) Contador Automático de Referências (_ARC_)  
+
+O Swift usa o Contador Automático de Referências (_Automatic Reference Counting - ARC_) para observar e administrar o uso da memória do seu app. Na maioria dos casos, isso significa que o gerenciamento da memória "apenas funciona" no Swift e você não precisa se preocupar, tampouco, pensar sobre isso. O _ARC_, automaticamente, libera a memória usada por instâncias de classes quando elas não são mais necessárias.
+
+Contudo, tem alguns casos, o _ARC_ requer mais informações sobre o relacionamento entre partes do seu código com o objetivo de gerenciar a memória para você. Abaixo, tentarei mostrar exemplo de como você habilita o _ARC_ gerenciar toda a memória do seu app.
+
+##### _ARC_ em ação
+
+Aqui, vou trazer o exemplo do ARC funcionando, de acordo com a documentação da Apple.
+
+Considere o código abaixo:
+
+```swift
+class Person {
+	let name: String
+	init(name: String) {
+		self.name = name
+		print("\(name) está sendo inicializado")
+	}
+	deinit {
+		print("\(name) está sendo deinicializado")
+	}
+}
+```
+A classe _Person_ possui um deinicializador que imprime a messagem quando uma instância da classe é desalocada (retirada da memória).
+
+A seguir,  têm-se a definição de três variáveis do tipo _Person?_, a quais são usadas para atribuir múltiplas referências a uma nova instância da classe _Person_, lembrando que, como são opcionais, elas são inicializadas automaticamente com valor _nil_, portanto, não referem-se a uma instância de _Person_, ainda.
+
+```swift
+var reference1: Person?
+var reference2: Person?
+var reference3: Person?
+```
+
+Agora, você pode criar uma nova instância de _Person_ e atribuir a uma dessas 3 variáveis:
+
+```swift
+var reference1 = Person(name: "Joãozinho")
+// Imprime "Joãozinho está sendo inicializado"
+```
+
+Devido a nova instância de _Person_ que foi atribuída a variável _reference1_, agora, há uma referência **forte** (***strong***) de _refereence1_ para nova instância de _Person_. Como há, pelo menos 1 referência _strong_, o _ARC_ **assegura** que essa _Person_ **permanecerá na memória** e não será desalocada.
+
+Se você atribui a mesma instância dee _Person_ a mais duas variáveis, mais duas referências _strong_ serão estabelecidas:
+
+```swift
+var reference2 = reference1
+var reference3 = reference1
+```
+Agora, existem **três referências forte** para uma **única instância** de _Person_
+
+Se você quebra duas dessas referências (incluindo a referência original) pela atribuição do valor _nil_ a elas, **ainda resta uma única referência forte**, assim, **a instância de _Person_ não será desalocada**:
+
+```swift
+var reference1 = nil
+var reference2 = nil
+```
+
+O _ARC_ **não desaloca** a instância de _Person_ **até que a terceira e última referência forte seja quebrada**:
+
+```swift
+var reference3 = nil
+// Imprime "Joãozinho está sendo deinicializado"
+```
+
+Como você percebeu, as referências são qualificadas, o _ARC_ conta **apenas** referências **fortes (_strong_)**, então, a seguir, vamos mostrar os outros dois tipos de referências e defini-las.
+
+#### 3.2) _Strong_ x _Weak_ x _Unowned_
+
+
+
+#### 3.3) Ciclos de Referências Fortes
+
+
+### 4) Referências
